@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문장 추가하기</title>
+    <style>
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; background-color: #121212; font-family: sans-serif; color: white;
+        }
+        .container {
+            background: #1e1e1e; padding: 30px; border-radius: 20px;
+            width: 90%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+            border: 1px solid #333; background: #2d2d2d; color: white; box-sizing: border-box;
+        }
+        button {
+            width: 100%; padding: 15px; margin-top: 10px; border: none;
+            border-radius: 8px; background: #2ecc71; color: white;
+            font-weight: bold; cursor: pointer;
+        }
+        button:disabled { background: #7f8c8d; }
+        .back-link { display: block; margin-top: 20px; color: #8ab4f8; text-decoration: none; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>새 문장 추가</h2>
+        <input type="text" id="q-input" placeholder="문제 (예: 사과)">
+        <input type="text" id="a-input" placeholder="정답 (예: Apple)">
+        <button id="submit-btn" onclick="sendData()">구글 시트에 추가</button>
+        <a href="index.html" class="back-link">메인으로 돌아가기</a>
+    </div>
+
+    <script>
+        // ⚠️ 여기에 구글 Apps Script 웹 앱 URL을 붙여넣으세요.
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxHkBI_X_KuYLEnQ7vs6eFjBQ0voWQvj1pNVGnkb1OkuNdYUPfl6T9Ft7iDTQXGTZrU/exec';
+
+        async function sendData() {
+            const q = document.getElementById('q-input').value;
+            const a = document.getElementById('a-input').value;
+            const btn = document.getElementById('submit-btn');
+
+            if(!q || !a) return alert("내용을 입력해주세요.");
+
+            btn.disabled = true;
+            btn.innerText = "전송 중...";
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ question: q, answer: a })
+                });
+
+                const result = await response.json();
+                if(result.result === "success") {
+                    alert("성공적으로 추가되었습니다!");
+                    document.getElementById('q-input').value = "";
+                    document.getElementById('a-input').value = "";
+                }
+            } catch (error) {
+                console.error(error);
+                alert("오류가 발생했습니다. 콘솔을 확인하세요.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "구글 시트에 추가";
+            }
+        }
+    </script>
+</body>
+</html>
