@@ -50,6 +50,19 @@
         
         #counter { margin-top: 30px; color: #999; font-weight: bold; }
         #guide { margin-top: 15px; color: #bbb; font-size: 0.9rem; }
+        /* 텍스트 선택 방지 스타일 */
+        #display-area {
+            user-select: none;           /* 표준 */
+            -webkit-user-select: none;   /* 사파리/크롬 */
+            -moz-user-select: none;      /* 파이어폭스 */
+            -ms-user-select: none;       /* IE/엣지 */
+            
+            /* 기존 스타일들... */
+            display: none; width: 85%; max-width: 800px; min-height: 400px;
+            background: white; color: #1a1a1a; padding: 50px; border-radius: 30px;
+            text-align: center; cursor: pointer; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
@@ -129,6 +142,19 @@
                 }
             }
         }
+        // 키보드 이벤트 리스너 추가
+        document.addEventListener('keydown', function(e) {
+            // 스페이스바(Space) 또는 엔터(Enter) 키 확인
+            if (e.key === ' ' || e.key === 'Enter') {
+                // 기본 동작 방지 (스페이스바 누를 때 페이지가 아래로 내려가는 현상 등)
+                e.preventDefault();
+                
+                // 데이터가 로드된 상태(display-area가 보이는 상태)에서만 클릭 함수 실행
+                if (document.getElementById('display-area').style.display === 'flex') {
+                    handleScreenClick();
+                }
+            }
+        });
 
         fetchSheetData();
     </script>
