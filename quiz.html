@@ -90,30 +90,39 @@
     
         async function fetchSheetData() {
             try {
-                // 캐시를 방지하기 위해 타임스탬프 추가
                 const response = await fetch(WEB_APP_URL + '?t=' + new Date().getTime());
                 if (!response.ok) throw new Error('데이터를 불러올 수 없습니다.');
                 
-                // Apps Script의 doGet()에서 리턴한 JSON 데이터를 직접 받음
                 const data = await response.json();
                 
-                // 데이터 형식 변환 (doGet은 {question, answer} 형태로 줌)
-                quizData = data.map(item => ({
+                // 1. 전체 데이터 가공
+                let allData = data.map(item => ({
                     q: item.question,
                     a: item.answer
                 })).filter(item => item.q && item.q.trim() !== "");
-    
+        
+                // 2. 무작위 섞기
+                allData.sort(() => Math.random() - 0.5);
+        
+                // 3. URL에서 개수 파라미터 가져오기
+                const urlParams = new URLSearchParams(window.location.search);
+                const requestedCount = parseInt(urlParams.get('count'));
+        
+                // 4. 입력된 개수만큼만 자르기 (값이 없거나 잘못되면 전체 출력)
+                if (requestedCount && requestedCount > 0) {
+                    quizData = allData.slice(0, requestedCount);
+                } else {
+                    quizData = allData;
+                }
+        
                 if (quizData.length === 0) throw new Error('표시할 데이터가 없습니다.');
-    
-                // 무작위 섞기
-                quizData.sort(() => Math.random() - 0.5);
-    
+        
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('display-area').style.display = 'flex';
                 showQuestion();
             } catch (error) {
                 document.getElementById('loading').innerHTML = 
-                    `<span style="color: #ff6b6b;">오류: ${error.message}</span><br>웹 앱 URL을 확인해주세요.`;
+                    `<span style="color: #ff6b6b;">오류: ${error.message}</span>`;
             }
         }
 
