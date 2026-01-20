@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>구글 시트 랜덤 퀴즈 (오류 해결판)</title>
+    <style>
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; background-color: #121212; font-family: sans-serif; color: white;
+        }
+        #loading { font-size: 1.2rem; color: #8ab4f8; text-align: center; line-height: 1.6; }
+        #display-area {
+            display: none; width: 85%; max-width: 800px; min-height: 400px;
+            background: white; color: #1a1a1a; padding: 50px; border-radius: 30px;
+            text-align: center; cursor: pointer; flex-direction: column; justify-content: center; align-items: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .question { font-size: 2.2rem; font-weight: bold; margin-bottom: 30px; color: #222; word-break: keep-all; }
+        .answer { 
+            font-size: 1.8rem; color: #d35400; background: #fef5e7; padding: 20px; 
+            border-radius: 15px; display: none; width: 100%; box-sizing: border-box; font-weight: bold;
+        }
+        #counter { margin-top: 30px; color: #999; }
+        .error-btn { margin-top: 20px; padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div id="loading">
+        구글 시트 데이터를 가져오는 중...<br>
+        <span style="font-size: 0.8rem; color: #777;">(네트워크 상태에 따라 5~10초 정도 소요될 수 있습니다)</span>
+    </div>
+
+    <div id="display-area" onclick="handleScreenClick()">
+        <div class="question" id="question-text"></div>
+        <div class="answer" id="answer-text"></div>
+        <div id="counter"></div>
+        <div style="margin-top: 20px; color: #bbb; font-size: 0.9rem;">클릭하면 정답 공개</div>
+    </div>
+
+    <script>
+        // 보강된 프록시 주소 (corsproxy.io 사용)
+        const TARGET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTdSnElq5K1W3OnVVD5HIwDp-3rPnaRxwgLqFPYaER2v1-sVfMsn3sGv8gwNcxhk8YRVA9-4ayuJW4g/pub?output=csv';
+        const PROXY_URL = 'https://corsproxy.io/?' + encodeURIComponent(TARGET_URL);
+
+        let quizData = [];
+        let currentIndex = 0;
+        let isShowingAnswer = false;
+
+        async function fetchSheetData() {
+            try {
+                // fetch 옵션에 타임아웃 방지 설정 추가
+                const response = await fetch(PROXY_URL, {
+                    method: 'GET',
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+
+                if (!response.ok) throw new Error('서버 응답 오류 (Status: ' + response.status + ')');
+                
+                const csvText = await response.text();
+                const rows = csvText.split('\n').filter(row => row.trim() !== "");
+
+                quizData = rows.map(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    return {
+                        q: cols[0] ? cols[0].replace(/^"|"$/g, '').trim() : '',
+                        a: cols[1] ? cols[1].replace(/^"|"$/g, '').trim() : ''
+                    };
+                }).filter(item => item.q !== "" && !item.q.includes("문제")); 
+
+                if (quizData.length === 0) throw new Error('데이터 파싱 실패');
+
+                quizData.sort(() => Math.random() - 0.5);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('display-area').style.display = 'flex';
+                showQuestion();
+            } catch (error) {
+                document.getElementById('loading').innerHTML = `
+                    <span style="color: #ff6b6b;">연결 시간 초과 또는 오류</span><br>
+                    <small>${error.message}</small><br>
+                    <button class="error-btn" onclick="location.reload()">다시 시도하기</button>
+                `;
+            }
+        }
+
+        function showQuestion() {
+            isShowingAnswer = false;
+            const item = quizData[currentIndex];
+            document.getElementById('question-text').innerText = item.q;
+            document.getElementById('answer-text').innerText = item.a;
+            document.getElementById('answer-text').style.display = 'none';
+            document.getElementById('counter').innerText = (currentIndex + 1) + " / " + quizData.length;
+        }
+
+        function handleScreenClick() {
+            if (!isShowingAnswer) {
+                document.getElementById('answer-text').style.display = 'block';
+                isShowingAnswer = true;
+            } else {
+                currentIndex++;
+                if (currentIndex < quizData.length) {
+                    showQuestion();
+                } else {
+                    alert("모든 문제를 완료했습니다! 다시 시작합니다.");
+                    location.reload();
+                }
+            }
+        }
+
+        fetchSheetData();
+    </script>
+</body>
+</html>
