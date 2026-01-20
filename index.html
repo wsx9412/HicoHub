@@ -43,11 +43,25 @@
     <h1>📚 학습 도우미</h1>
 
     <div class="menu-container">
-        <p>구글 시트와 연동된 실시간 퀴즈</p>
-        <a href="quiz.html" class="btn-start">퀴즈 시작하기</a>
+        <p>학습 관리</p>
+        <div style="margin-bottom: 15px;">
+            <label for="quiz-count" style="font-size: 0.9rem; color: #ccc;">문제 개수 : </label>
+            <input type="number" id="quiz-count" value="10" min="1" 
+                   style="width: 50px; padding: 5px; border-radius: 5px; border: none; text-align: center;">
+        </div>
+        
+        <a href="#" onclick="startQuiz()" class="btn-start">퀴즈 시작하기</a>
         <a href="add.html" class="btn-start btn-add">새 문장 추가하기</a>
         <a href="remove.html" class="btn-start" style="background: #ff4757;">문장 관리/제거</a>
     </div>
+    
+    <script>
+        function startQuiz() {
+            const count = document.getElementById('quiz-count').value;
+            // quiz.html 뒤에 ?count=숫자 를 붙여서 전달합니다.
+            location.href = `quiz.html?count=${count}`;
+        }
+    </script>
 
     <p style="margin-top: 30px;">© 2026 My Study App. All rights reserved.</p>
 
