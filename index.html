@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 학습 대시보드</title>
+    <style>
+        body {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; margin: 0; background-color: #121212;
+            font-family: 'Pretendard', sans-serif; color: white;
+        }
+        h1 { margin-bottom: 30px; font-size: 2.5rem; color: #8ab4f8; }
+        .menu-container {
+            background: #1e1e1e; padding: 40px; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
+        }
+        .btn-start {
+            display: inline-block; padding: 20px 50px; font-size: 1.2rem;
+            font-weight: bold; color: white; background: #3498db;
+            text-decoration: none; border-radius: 12px;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        .btn-start:hover {
+            background: #2980b9; transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+        }
+        p { color: #888; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <h1>📚 학습 도우미</h1>
+
+    <div class="menu-container">
+        <p>구글 시트와 연동된 실시간 퀴즈</p>
+        <a href="quiz.html" class="btn-start">퀴즈 시작하기</a>
+    </div>
+
+    <p>© 2026 My Study App. All rights reserved.</p>
+
+</body>
+</html>
