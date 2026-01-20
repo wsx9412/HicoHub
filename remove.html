@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문장 관리/제거</title>
+    <style>
+        body { background-color: #121212; color: white; font-family: sans-serif; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .list-container { width: 100%; max-width: 600px; background: #1e1e1e; border-radius: 15px; padding: 20px; }
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .item:last-child { border-bottom: none; }
+        .del-btn { background: #ff4757; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+        .home-link { margin-top: 20px; color: #8ab4f8; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <h2>문장 삭제 관리</h2>
+    <div class="list-container" id="list-container">목록을 불러오는 중...</div>
+    <a href="index.html" class="home-link">홈으로 돌아가기</a>
+
+    <script>
+        const WEB_APP_URL = '여기에_새로_배포한_웹앱_URL을_넣으세요';
+
+        async function loadList() {
+            const response = await fetch(WEB_APP_URL);
+            const data = await response.json();
+            const container = document.getElementById('list-container');
+            container.innerHTML = '';
+
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'item';
+                div.innerHTML = `
+                    <span>${item.question} (${item.answer})</span>
+                    <button class="del-btn" onclick="deleteItem(${item.row})">삭제</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function deleteItem(row) {
+            if(!confirm("정말 삭제하시겠습니까?")) return;
+            
+            await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: "delete", row: row })
+            });
+            alert("삭제되었습니다.");
+            loadList(); // 목록 새로고침
+        }
+
+        loadList();
+    </script>
+</body>
+</html>
