@@ -56,9 +56,24 @@
     </div>
     
     <script>
+        // 페이지가 로드될 때 실행되는 함수
+        window.onload = function() {
+            // 1. 브라우저 저장소에서 'savedQuizCount'라는 이름으로 저장된 값을 가져옵니다.
+            const savedCount = localStorage.getItem('savedQuizCount');
+            
+            // 2. 만약 저장된 값이 있다면, 입력창에 그 값을 넣어줍니다.
+            if (savedCount) {
+                document.getElementById('quiz-count').value = savedCount;
+            }
+        };
+        
         function startQuiz() {
             const count = document.getElementById('quiz-count').value;
-            // quiz.html 뒤에 ?count=숫자 를 붙여서 전달합니다.
+            
+            // 3. 퀴즈를 시작할 때, 입력한 숫자를 브라우저 저장소에 저장합니다.
+            localStorage.setItem('savedQuizCount', count);
+            
+            // 4. quiz.html로 이동
             location.href = `quiz.html?count=${count}`;
         }
     </script>
