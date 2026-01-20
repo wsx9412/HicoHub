@@ -14,18 +14,25 @@
         .menu-container {
             background: #1e1e1e; padding: 40px; border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
+            display: flex; flex-direction: column; align-items: center; /* 버튼 세로 정렬 */
         }
         .btn-start {
-            display: inline-block; padding: 20px 50px; font-size: 1.2rem;
+            display: inline-block; width: 220px; padding: 20px 0; font-size: 1.2rem;
             font-weight: bold; color: white; background: #3498db;
             text-decoration: none; border-radius: 12px;
             transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            
+            /* 핵심 수정 부분: 버튼 사이의 간격 */
+            margin: 10px 0; 
         }
         .btn-start:hover {
             background: #2980b9; transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
         }
-        p { color: #888; margin-top: 20px; }
+        .btn-add { background: #2ecc71; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+        .btn-add:hover { background: #27ae60; box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5); }
+        
+        p { color: #888; margin-bottom: 20px; }
     </style>
 </head>
 <body>
@@ -35,11 +42,10 @@
     <div class="menu-container">
         <p>구글 시트와 연동된 실시간 퀴즈</p>
         <a href="quiz.html" class="btn-start">퀴즈 시작하기</a>
-        <br>
-        <a href="add.html" class="btn-start" style="background: #2ecc71;">새 문장 추가하기</a>
+        <a href="add.html" class="btn-start btn-add">새 문장 추가하기</a>
     </div>
 
-    <p>© 2026 My Study App. All rights reserved.</p>
+    <p style="margin-top: 30px;">© 2026 My Study App. All rights reserved.</p>
 
 </body>
 </html>
