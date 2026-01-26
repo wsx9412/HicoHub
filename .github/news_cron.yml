@@ -1,0 +1,28 @@
+name: Daily News Collector
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 한국 시간 오전 9시 실행 (UTC 00:00)
+  workflow_dispatch: # 버튼 눌러서 수동 실행 가능하게 설정
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/checkout@v3
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install gspread google-auth requests beautifulsoup4
+
+      - name: Run collector
+        env:
+          GOOGLE_SHEETS_CREDS: ${{ secrets.GOOGLE_SHEETS_CREDS }}
+          NEWS_KEYWORD: '' # 여기에 원하는 키워드를 적거나 비워두세요
+        run: python collector.py
