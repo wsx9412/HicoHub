@@ -10,15 +10,12 @@
         input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: white; min-width: 200px; }
         .btn-search { padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        /* 표 스타일 */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #252525; border-radius: 10px; overflow: hidden; }
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
         th { background-color: #3498db; color: white; font-size: 0.9rem; }
         tr:hover { background-color: #2d2d2d; }
         .news-link { color: #8ab4f8; text-decoration: none; font-weight: 500; }
-        .news-link:hover { text-decoration: underline; }
         .media-tag { background: #444; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: #ccc; }
-        
         #loading { display: none; margin: 20px 0; color: #3498db; font-weight: bold; }
         .home-btn { display: inline-block; margin-bottom: 20px; color: #8ab4f8; text-decoration: none; }
     </style>
@@ -27,14 +24,14 @@
 
     <div class="container">
         <a href="index.html" class="home-btn">← 홈으로 돌아가기</a>
-        <h2>📰 실시간 뉴스 리스트</h2>
+        <h2>📰 실시간 뉴스 리스트 (RSS)</h2>
         
         <div class="search-box">
             <input type="text" id="query" placeholder="검색어를 입력하세요 (비워두면 최신뉴스)">
             <button class="btn-search" onclick="fetchNews()">뉴스 불러오기</button>
         </div>
 
-        <div id="loading">📡 뉴스를 수집하는 중입니다...</div>
+        <div id="loading">📡 데이터를 가져오는 중...</div>
 
         <table id="news-table" style="display: none;">
             <thead>
@@ -43,59 +40,59 @@
                     <th style="width: 30%;">신문사</th>
                 </tr>
             </thead>
-            <tbody id="news-body">
-                </tbody>
+            <tbody id="news-body"></tbody>
         </table>
     </div>
 
     <script>
-        
         async function fetchNews() {
             let query = document.getElementById('query').value.trim();
             if (!query) query = "최신뉴스";
-        
+
             const loading = document.getElementById('loading');
             const table = document.getElementById('news-table');
             const tbody = document.getElementById('news-body');
-        
+
             loading.style.display = 'block';
             table.style.display = 'none';
             tbody.innerHTML = '';
-        
-            // 구글 뉴스 RSS URL (rss2json 서비스를 통해 JSON으로 변환)
+
+            // 1. 구글 뉴스 RSS URL 생성 (한국어/한국 지역 설정)
             const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=ko&gl=KR&ceid=KR:ko`;
+            
+            // 2. RSS를 JSON으로 변환해주는 무료 서비스 API 사용 (CORS 해결)
             const apiServiceUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-        
+
             try {
                 const response = await fetch(apiServiceUrl);
                 const data = await response.json();
-        
-                if (data.status !== 'ok' || data.items.length === 0) {
-                    alert("뉴스를 불러오지 못했습니다. 키워드를 확인해 주세요.");
-                    return;
+
+                // data.items가 비어있는지 확인
+                if (data.status !== 'ok' || !data.items || data.items.length === 0) {
+                    throw new Error("데이터를 찾을 수 없습니다.");
                 }
-        
+
                 data.items.forEach(item => {
                     const row = document.createElement('tr');
                     
-                    // RSS 데이터에서 신문사 이름 추출 (보통 제목 뒤에 - 신문사 형태로 붙어 있음)
+                    // 제목에서 신문사 분리 (제목 - 신문사 구조)
                     const titleParts = item.title.split(' - ');
                     const pureTitle = titleParts[0];
                     const mediaName = titleParts.length > 1 ? titleParts[titleParts.length - 1] : "뉴스";
-        
+
                     row.innerHTML = `
                         <td><a href="${item.link}" target="_blank" class="news-link">${pureTitle}</a></td>
                         <td><span class="media-tag">${mediaName}</span></td>
                     `;
                     tbody.appendChild(row);
                 });
-        
+
                 loading.style.display = 'none';
                 table.style.display = 'table';
-        
+
             } catch (error) {
                 console.error(error);
-                alert("데이터를 가져오는 중에 오류가 발생했습니다.");
+                alert("뉴스를 불러오는 데 실패했습니다. 다시 시도해 주세요.");
                 loading.style.display = 'none';
             }
         }
