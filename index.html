@@ -6,79 +6,86 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>나의 학습 대시보드</title>
+    
+    <title>스마트 학습 대시보드</title>
     <style>
         body {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            height: 100vh; margin: 0; background-color: #121212;
-            font-family: 'Pretendard', sans-serif; color: white;
+            min-height: 100vh; margin: 0; background-color: #121212;
+            font-family: 'Pretendard', -apple-system, sans-serif; color: white;
         }
-        h1 { margin-bottom: 30px; font-size: 2.5rem; color: #8ab4f8; }
-        .menu-container {
-            background: #1e1e1e; padding: 40px; border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center;
-            display: flex; flex-direction: column; align-items: center; /* 버튼 세로 정렬 */
-        }
-        .btn-start {
-            display: inline-block; width: 220px; padding: 20px 0; font-size: 1.2rem;
-            font-weight: bold; color: white; background: #3498db;
-            text-decoration: none; border-radius: 12px;
-            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-            
-            /* 핵심 수정 부분: 버튼 사이의 간격 */
-            margin: 10px 0; 
-        }
-        .btn-start:hover {
-            background: #2980b9; transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
-        }
-        .btn-add { background: #2ecc71; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
-        .btn-add:hover { background: #27ae60; box-shadow: 0 6px 20px rgba(46, 204, 113, 0.5); }
+        h1 { margin-bottom: 30px; font-size: 2.5rem; color: #8ab4f8; letter-spacing: -1px; }
         
-        p { color: #888; margin-bottom: 20px; }
+        .menu-container {
+            background: #1e1e1e; padding: 40px; border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.6); text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+            width: 90%; max-width: 400px;
+        }
+
+        .count-box {
+            margin-bottom: 25px; background: #2d2d2d;
+            padding: 12px 25px; border-radius: 12px; border: 1px solid #444;
+        }
+        input[type="number"] {
+            width: 60px; padding: 5px; border-radius: 5px; border: none;
+            text-align: center; font-size: 1.1rem; background: #121212;
+            color: #8ab4f8; font-weight: bold; margin-left: 10px;
+        }
+
+        .btn {
+            display: inline-block; width: 100%; padding: 18px 0; font-size: 1.1rem;
+            font-weight: bold; color: white; text-decoration: none; border-radius: 14px;
+            transition: all 0.2s ease; margin: 8px 0; border: none; cursor: pointer;
+        }
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        
+        .btn-quiz { background: #3498db; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); }
+        .btn-news { background: #9b59b6; box-shadow: 0 4px 15px rgba(155, 89, 182, 0.3); }
+        .btn-add { background: #2ecc71; box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3); }
+        .btn-manage { background: #ff4757; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
+        
+        .footer-text { color: #666; margin-top: 30px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <h1>📚 학습 도우미</h1>
+    <h1>📚 AI Study Master</h1>
 
     <div class="menu-container">
-        <p>학습 관리</p>
-        <div style="margin-bottom: 15px;">
-            <label for="quiz-count" style="font-size: 0.9rem; color: #ccc;">문제 개수 : </label>
-            <input type="number" id="quiz-count" value="10" min="1" 
-                   style="width: 50px; padding: 5px; border-radius: 5px; border: none; text-align: center;">
+        <div class="count-box">
+            <label for="quiz-count">진행할 문제 수</label>
+            <input type="number" id="quiz-count" value="10" min="1">
         </div>
+
+        <button onclick="startQuiz()" class="btn btn-quiz">🚀 퀴즈 시작하기</button>
+        <a href="news.html" class="btn btn-news">📰 실시간 뉴스 수집</a>
         
-        <a href="#" onclick="startQuiz()" class="btn-start">퀴즈 시작하기</a>
-        <a href="add.html" class="btn-start btn-add">새 문장 추가하기</a>
-        <a href="remove.html" class="btn-start" style="background: #ff4757;">문장 관리/제거</a>
+        <hr style="width:100%; border:0; border-top:1px solid #333; margin:15px 0;">
+        
+        <a href="add.html" class="btn btn-add">➕ 새 문장 추가</a>
+        <a href="remove.html" class="btn btn-manage">⚙️ 문장 관리/제거</a>
     </div>
-    
+
+    <div class="footer-text">Connected to Google Sheets Real-time Engine</div>
+
     <script>
-        // 페이지가 로드될 때 실행되는 함수
+        // 마지막 입력값 기억하기
         window.onload = function() {
-            // 1. 브라우저 저장소에서 'savedQuizCount'라는 이름으로 저장된 값을 가져옵니다.
             const savedCount = localStorage.getItem('savedQuizCount');
-            
-            // 2. 만약 저장된 값이 있다면, 입력창에 그 값을 넣어줍니다.
             if (savedCount) {
                 document.getElementById('quiz-count').value = savedCount;
             }
         };
-        
+
         function startQuiz() {
             const count = document.getElementById('quiz-count').value;
-            
-            // 3. 퀴즈를 시작할 때, 입력한 숫자를 브라우저 저장소에 저장합니다.
             localStorage.setItem('savedQuizCount', count);
             
-            // 4. quiz.html로 이동
-            location.href = `quiz.html?count=${count}`;
+            // 캐시 방지용 파라미터 v 추가
+            const v = new Date().getTime();
+            location.href = `quiz.html?count=${count}&v=${v}`;
         }
     </script>
-
-    <p style="margin-top: 30px;">© 2026 My Study App. All rights reserved.</p>
-
 </body>
 </html>
