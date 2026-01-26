@@ -59,27 +59,42 @@
     </div>
 
     <script>
-        function searchNews() {
-            const query = document.getElementById('search-query').value;
-            const media = document.getElementById('search-media').value;
+        
+      function searchNews() {
+            let query = document.getElementById('search-query').value.trim();
+            const media = document.getElementById('search-media').value.trim();
             const time = document.getElementById('search-time').value;
             const count = document.getElementById('search-count').value;
-
-            if (!query) return alert("검색어를 입력하세요!");
-
-            // 구글 뉴스 검색 URL 조합 로직
-            let finalQuery = query;
-            if (media) finalQuery += ` site:${getMediaUrl(media)}`;
-
+        
+            // 검색어가 비어있을 경우 "최신 뉴스"로 자동 설정
+            if (!query) {
+                query = "최신뉴스";
+                console.log("검색어가 없어 '최신뉴스'로 검색을 진행합니다.");
+            }
+        
+            // 구글 뉴스 검색 URL 조합
+            let finalSearchTerm = query;
+            if (media) {
+                finalSearchTerm += ` site:${getMediaUrl(media)}`;
+            }
+        
             const tbs = time !== 'any' ? `&tbs=qdr:${time}` : '';
-            const googleNewsUrl = `https://www.google.com/search?q=${encodeURIComponent(finalQuery)}&tbm=nws${tbs}&num=${count}`;
-
-            // 실제 크롤링은 서버가 필요하므로, 여기서는 검색 엔진으로 연결해주는 다리 역할을 합니다.
-            alert(`${count}개의 뉴스를 검색합니다. 검색 페이지로 이동합니다.`);
+            // 정렬 순서를 최신순으로 하고 싶다면 &tbs=sbd:1 를 추가할 수 있습니다.
+            const googleNewsUrl = `https://www.google.com/search?q=${encodeURIComponent(finalSearchTerm)}&tbm=nws${tbs}&num=${count}`;
+        
+            // 새 창으로 검색 결과 열기
             window.open(googleNewsUrl, '_blank');
             
-            // 시뮬레이션 결과 표시
-            displayMockResults(query, media, count);
+            // 화면에 상태 표시
+            const results = document.getElementById('news-results');
+            results.innerHTML = `
+                <div style="background:#2d2d2d; padding:15px; border-radius:10px; border:1px solid #444;">
+                    <h4 style="margin:0; color:#8ab4f8;">🔎 '${query}' 검색 요청 완료</h4>
+                    <p style="font-size:0.85rem; color:#aaa; margin-top:5px;">
+                        ${media ? `신문사: ${media} | ` : ''} 기간: ${document.getElementById('search-time').options[document.getElementById('search-time').selectedIndex].text}
+                    </p>
+                </div>
+            `;
         }
 
         function getMediaUrl(name) {
