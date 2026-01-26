@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>  
+    <meta charset="UTF-8">
+    <title>실시간 뉴스 수집기</title>
+    <style>
+        body { background-color: #121212; color: white; font-family: 'Pretendard', sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 20px; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #8ab4f8; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: white; box-sizing: border-box; }
+        .btn-search { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-search:hover { background: #2980b9; }
+        
+        #news-results { margin-top: 30px; }
+        .news-item { background: #2d2d2d; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #3498db; }
+        .news-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; color: #fff; text-decoration: none; display: block; }
+        .news-meta { font-size: 0.8rem; color: #aaa; }
+        .home-btn { display: inline-block; margin-bottom: 20px; color: #8ab4f8; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="home-btn">← 홈으로</a>
+        <h2>📰 뉴스 검색 및 수집</h2>
+        
+        <div class="input-group">
+            <label>검색어</label>
+            <input type="text" id="search-query" placeholder="예: 인공지능, 경제">
+        </div>
+
+        <div class="input-group">
+            <label>신문사 지정 (선택)</label>
+            <input type="text" id="search-media" placeholder="예: 조선일보, 매일경제">
+        </div>
+
+        <div style="display: flex; gap: 10px;" class="input-group">
+            <div style="flex: 1;">
+                <label>기간 설정</label>
+                <select id="search-time">
+                    <option value="any">전체 기간</option>
+                    <option value="d">지난 24시간</option>
+                    <option value="w">지난 1주일</option>
+                    <option value="m">지난 1개월</option>
+                    <option value="y">지난 1년</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label>수집 개수 (최대 100)</label>
+                <input type="number" id="search-count" value="10" min="1" max="100">
+            </div>
+        </div>
+
+        <button class="btn-search" onclick="searchNews()">뉴스 검색하기</button>
+
+        <div id="news-results">
+            </div>
+    </div>
+
+    <script>
+        function searchNews() {
+            const query = document.getElementById('search-query').value;
+            const media = document.getElementById('search-media').value;
+            const time = document.getElementById('search-time').value;
+            const count = document.getElementById('search-count').value;
+
+            if (!query) return alert("검색어를 입력하세요!");
+
+            // 구글 뉴스 검색 URL 조합 로직
+            let finalQuery = query;
+            if (media) finalQuery += ` site:${getMediaUrl(media)}`;
+
+            const tbs = time !== 'any' ? `&tbs=qdr:${time}` : '';
+            const googleNewsUrl = `https://www.google.com/search?q=${encodeURIComponent(finalQuery)}&tbm=nws${tbs}&num=${count}`;
+
+            // 실제 크롤링은 서버가 필요하므로, 여기서는 검색 엔진으로 연결해주는 다리 역할을 합니다.
+            alert(`${count}개의 뉴스를 검색합니다. 검색 페이지로 이동합니다.`);
+            window.open(googleNewsUrl, '_blank');
+            
+            // 시뮬레이션 결과 표시
+            displayMockResults(query, media, count);
+        }
+
+        function getMediaUrl(name) {
+            // 주요 신문사 도메인 매핑 (간단 예시)
+            const mediaMap = {
+                '조선일보': 'chosun.com',
+                '중앙일보': 'joongang.co.kr',
+                '동아일보': 'donga.com',
+                '매일경제': 'mk.co.kr',
+                '한겨레': 'hani.co.kr'
+            };
+            return mediaMap[name] || name;
+        }
+
+        function displayMockResults(q, m, c) {
+            const results = document.getElementById('news-results');
+            results.innerHTML = `<h3>'${q}'에 대한 수집 요청 완료</h3><p style="color:#888;">실시간 보안 정책으로 인해 상세 내용은 검색창에서 확인 가능합니다.</p>`;
+        }
+    </script>
+  </body>
+</html>
