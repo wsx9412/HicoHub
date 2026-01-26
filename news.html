@@ -1,118 +1,111 @@
 <!DOCTYPE html>
 <html lang="ko">
-  <head>  
+<head>
     <meta charset="UTF-8">
-    <title>실시간 뉴스 수집기</title>
+    <title>실시간 뉴스 수집 목록</title>
     <style>
         body { background-color: #121212; color: white; font-family: 'Pretendard', sans-serif; padding: 20px; }
-        .container { max-width: 800px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 20px; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #8ab4f8; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: white; box-sizing: border-box; }
-        .btn-search { width: 100%; padding: 15px; background: #3498db; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-search:hover { background: #2980b9; }
+        .container { max-width: 900px; margin: 0 auto; background: #1e1e1e; padding: 30px; border-radius: 20px; }
+        .search-box { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2d2d2d; color: white; min-width: 200px; }
+        .btn-search { padding: 12px 25px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
         
-        #news-results { margin-top: 30px; }
-        .news-item { background: #2d2d2d; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 4px solid #3498db; }
-        .news-title { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; color: #fff; text-decoration: none; display: block; }
-        .news-meta { font-size: 0.8rem; color: #aaa; }
+        /* 표 스타일 */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #252525; border-radius: 10px; overflow: hidden; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #333; }
+        th { background-color: #3498db; color: white; font-size: 0.9rem; }
+        tr:hover { background-color: #2d2d2d; }
+        .news-link { color: #8ab4f8; text-decoration: none; font-weight: 500; }
+        .news-link:hover { text-decoration: underline; }
+        .media-tag { background: #444; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; color: #ccc; }
+        
+        #loading { display: none; margin: 20px 0; color: #3498db; font-weight: bold; }
         .home-btn { display: inline-block; margin-bottom: 20px; color: #8ab4f8; text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <a href="index.html" class="home-btn">← 홈으로</a>
-        <h2>📰 뉴스 검색 및 수집</h2>
+        <a href="index.html" class="home-btn">← 홈으로 돌아가기</a>
+        <h2>📰 실시간 뉴스 리스트</h2>
         
-        <div class="input-group">
-            <label>검색어 (선택)</label>
-            <input type="text" id="search-query" placeholder="예: 인공지능, 경제">
+        <div class="search-box">
+            <input type="text" id="query" placeholder="검색어를 입력하세요 (비워두면 최신뉴스)">
+            <button class="btn-search" onclick="fetchNews()">뉴스 불러오기</button>
         </div>
 
-        <div class="input-group">
-            <label>신문사 지정 (선택)</label>
-            <input type="text" id="search-media" placeholder="예: 조선일보, 매일경제">
-        </div>
+        <div id="loading">📡 뉴스를 수집하는 중입니다...</div>
 
-        <div style="display: flex; gap: 10px;" class="input-group">
-            <div style="flex: 1;">
-                <label>기간 설정</label>
-                <select id="search-time">
-                    <option value="any">전체 기간</option>
-                    <option value="d">지난 24시간</option>
-                    <option value="w">지난 1주일</option>
-                    <option value="m">지난 1개월</option>
-                    <option value="y">지난 1년</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label>수집 개수 (최대 100)</label>
-                <input type="number" id="search-count" value="10" min="1" max="100">
-            </div>
-        </div>
-
-        <button class="btn-search" onclick="searchNews()">뉴스 검색하기</button>
-
-        <div id="news-results">
-            </div>
+        <table id="news-table" style="display: none;">
+            <thead>
+                <tr>
+                    <th style="width: 70%;">뉴스 제목</th>
+                    <th style="width: 30%;">신문사</th>
+                </tr>
+            </thead>
+            <tbody id="news-body">
+                </tbody>
+        </table>
     </div>
 
     <script>
-        
-      function searchNews() {
-            let query = document.getElementById('search-query').value.trim();
-            const media = document.getElementById('search-media').value.trim();
-            const time = document.getElementById('search-time').value;
-            const count = document.getElementById('search-count').value;
-        
-            // 검색어가 비어있을 경우 "최신 뉴스"로 자동 설정
-            if (!query) {
-                query = "최신뉴스";
-                console.log("검색어가 없어 '최신뉴스'로 검색을 진행합니다.");
-            }
-        
-            // 구글 뉴스 검색 URL 조합
-            let finalSearchTerm = query;
-            if (media) {
-                finalSearchTerm += ` site:${getMediaUrl(media)}`;
-            }
-        
-            const tbs = time !== 'any' ? `&tbs=qdr:${time}` : '';
-            // 정렬 순서를 최신순으로 하고 싶다면 &tbs=sbd:1 를 추가할 수 있습니다.
-            const googleNewsUrl = `https://www.google.com/search?q=${encodeURIComponent(finalSearchTerm)}&tbm=nws${tbs}&num=${count}`;
-        
-            // 새 창으로 검색 결과 열기
-            window.open(googleNewsUrl, '_blank');
-            
-            // 화면에 상태 표시
-            const results = document.getElementById('news-results');
-            results.innerHTML = `
-                <div style="background:#2d2d2d; padding:15px; border-radius:10px; border:1px solid #444;">
-                    <h4 style="margin:0; color:#8ab4f8;">🔎 '${query}' 검색 요청 완료</h4>
-                    <p style="font-size:0.85rem; color:#aaa; margin-top:5px;">
-                        ${media ? `신문사: ${media} | ` : ''} 기간: ${document.getElementById('search-time').options[document.getElementById('search-time').selectedIndex].text}
-                    </p>
-                </div>
-            `;
-        }
+        async function fetchNews() {
+            let query = document.getElementById('query').value.trim();
+            if (!query) query = "최신뉴스";
 
-        function getMediaUrl(name) {
-            // 주요 신문사 도메인 매핑 (간단 예시)
-            const mediaMap = {
-                '조선일보': 'chosun.com',
-                '중앙일보': 'joongang.co.kr',
-                '동아일보': 'donga.com',
-                '매일경제': 'mk.co.kr',
-                '한겨레': 'hani.co.kr'
-            };
-            return mediaMap[name] || name;
-        }
+            const loading = document.getElementById('loading');
+            const table = document.getElementById('news-table');
+            const tbody = document.getElementById('news-body');
 
-        function displayMockResults(q, m, c) {
-            const results = document.getElementById('news-results');
-            results.innerHTML = `<h3>'${q}'에 대한 수집 요청 완료</h3><p style="color:#888;">실시간 보안 정책으로 인해 상세 내용은 검색창에서 확인 가능합니다.</p>`;
+            loading.style.display = 'block';
+            table.style.display = 'none';
+            tbody.innerHTML = '';
+
+            // CORS 우회를 위한 프록시 사용 (AllOrigins)
+            const targetUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&tbm=nws`;
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+                const data = await response.json();
+                
+                // 가져온 HTML을 파싱하기 위해 가상 DOM 생성
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                
+                // 구글 뉴스 검색 결과 구조에 맞춰 데이터 추출
+                // 참고: 구글의 클래스명은 유동적이므로 대표적인 태그 구조로 접근합니다.
+                const articles = doc.querySelectorAll('div.SoS9be'); 
+
+                if (articles.length === 0) {
+                    alert("뉴스를 찾지 못했습니다. 잠시 후 다시 시도해 주세요.");
+                    return;
+                }
+
+                articles.forEach(article => {
+                    const titleElement = article.querySelector('div.n0uTEe');
+                    const mediaElement = article.querySelector('div.Mg7d1e');
+                    const linkElement = article.querySelector('a');
+
+                    if (titleElement && mediaElement) {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><a href="${linkElement.href}" target="_blank" class="news-link">${titleElement.innerText}</a></td>
+                            <td><span class="media-tag">${mediaElement.innerText}</span></td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                });
+
+                loading.style.display = 'none';
+                table.style.display = 'table';
+
+            } catch (error) {
+                console.error(error);
+                alert("뉴스 수집 중 오류가 발생했습니다.");
+                loading.style.display = 'none';
+            }
         }
     </script>
-  </body>
+</body>
 </html>
