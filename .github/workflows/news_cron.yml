@@ -24,5 +24,5 @@ jobs:
       - name: Run collector
         env:
           GOOGLE_SHEETS_CREDS: ${{ secrets.GOOGLE_SHEETS_CREDS }}
-          NEWS_KEYWORD: '인공지능' # 여기에 원하는 키워드를 적거나 비워두세요
+          NEWS_KEYWORD: '' # 여기에 원하는 키워드를 적거나 비워두세요
         run: python collector.py
