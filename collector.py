@@ -15,7 +15,7 @@ client = gspread.authorize(creds)
 
 # 2. 구글 시트 열기 (본인의 시트 ID 입력)
 # 시트 URL의 /d/ 와 /edit 사이의 문자열입니다.
-SHEET_ID = '여러분의_시트_ID' 
+SHEET_ID = '1k8zmxLBPXz2uAUbjE8YwIfcUdlcL-S2VLZlkqU1cjsc' 
 sheet = client.open_by_key(SHEET_ID).sheet1
 
 # 3. 뉴스 검색 키워드 설정 (환경변수에서 가져오거나 기본값 사용)
